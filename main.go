@@ -4,12 +4,17 @@ import (
 	"net/http"
 )
 
+// Our library for storing books
+var library = map[int]book{}
+
 type author struct {
+	ID      int    `json:"id"`
 	Name    string `json:"name"`
 	Surname string `json:"surname"`
 }
 
 type book struct {
+	ID     int    `json:"id"`
 	Title  string `json:"randnumber"`
 	Pages  int    `json:"pages"`
 	Year   int    `json:"year"`
@@ -39,7 +44,7 @@ func deleteBook(w http.ResponseWriter, r *http.Request) {
 func main() {
 
 	http.HandleFunc("/getBooks", getBooks)
-	http.HandleFunc("getSpecificBook", getSpecBook)
+	http.HandleFunc("/getSpecificBook", getSpecBook)
 	http.HandleFunc("/createBook", createBook)
 	http.HandleFunc("/updateBook", updateBook)
 	http.HandleFunc("/deleteBook", deleteBook)
