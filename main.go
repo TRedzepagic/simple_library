@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// Our library for storing books
+// Our library for storing books, key being its ISBN (presumed unique), value being the book itself.
 var library = map[int]book{}
 
 type author struct {
@@ -47,8 +47,8 @@ func main() {
 	// Mock data initialization
 	testbook1 := book{ISBN: 111111, Title: "Cooking 1", Pages: 240, Year: 2003, Author: author{Name: "Tarik", Surname: "Redzepagic"}}
 	testbook2 := book{ISBN: 222222, Title: "Farming 1", Pages: 300, Year: 2005, Author: author{Name: "Kirat", Surname: "Pagicredz"}}
-	library[1] = testbook1
-	library[2] = testbook2
+	library[testbook1.ISBN] = testbook1
+	library[testbook2.ISBN] = testbook2
 
 	http.HandleFunc("/", getBooks)
 	http.HandleFunc("/getBooks", getBooks)
