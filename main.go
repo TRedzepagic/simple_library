@@ -148,6 +148,7 @@ func updateBook(w http.ResponseWriter, r *http.Request) {
 func deleteBook(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.Method)
 	wantedBook := r.URL.Query().Get("ISBN")
+	mutex.Lock()
 	_, found := library[wantedBook]
 	if found == false {
 		fmt.Fprintf(w, "Doesn't exist")
@@ -155,6 +156,7 @@ func deleteBook(w http.ResponseWriter, r *http.Request) {
 		delete(library, wantedBook)
 		fmt.Fprintf(w, "Successfully deleted book with ISBN : %s from library \n", wantedBook)
 	}
+	mutex.Unlock()
 }
 
 func main() {
