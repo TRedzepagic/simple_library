@@ -10,8 +10,10 @@ import (
 )
 
 // Our library for storing books, key being its ISBN (presumed unique), value being the book itself.
-var library = map[string]book{}
-var mutex sync.Mutex
+type libraryHandler struct {
+	library map[string]book
+	mux     sync.Mutex
+}
 
 type author struct {
 	Name    string `json:"name"`
@@ -26,13 +28,13 @@ type book struct {
 	Author *author `json:"author"`
 }
 
-func getBooks(w http.ResponseWriter, r *http.Request) {
+func (l *libraryHandler) getBooks(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.Method)
 	fmt.Println("Sending all books")
 
-	mutex.Lock()
-	bytes, marshallingError := json.Marshal(library)
-	mutex.Unlock()
+	l.mux.Lock()
+	bytes, marshallingError := json.Marshal(l.library)
+	l.mux.Unlock()
 	if marshallingError != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(marshallingError.Error()))
@@ -40,15 +42,15 @@ func getBooks(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, string(bytes))
 }
 
-func getBook(w http.ResponseWriter, r *http.Request) {
+func (l *libraryHandler) getBook(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.Method)
 	fmt.Println("Sending one book")
 
 	wantedBook := r.URL.Query().Get("ISBN")
 	fmt.Println(wantedBook)
 
-	mutex.Lock()
-	value, found := library[wantedBook]
+	l.mux.Lock()
+	value, found := l.library[wantedBook]
 	if found == false {
 		fmt.Fprintf(w, "Book with ISBN %s doesn't exist", wantedBook)
 	} else {
@@ -60,11 +62,11 @@ func getBook(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, string(bytes))
 
 	}
-	mutex.Unlock()
+	l.mux.Unlock()
 
 }
 
-func addBook(w http.ResponseWriter, r *http.Request) {
+func (l *libraryHandler) addBook(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.Method)
 
 	body, err := ioutil.ReadAll(r.Body)
@@ -91,13 +93,13 @@ func addBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mutex.Lock()
-	library[newBook.ISBN] = newBook
-	mutex.Unlock()
+	l.mux.Lock()
+	l.library[newBook.ISBN] = newBook
+	l.mux.Unlock()
 
 }
 
-func updateBook(w http.ResponseWriter, r *http.Request) {
+func (l *libraryHandler) updateBook(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.Method)
 
 	body, err := ioutil.ReadAll(r.Body)
@@ -124,9 +126,8 @@ func updateBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mutex.Lock()
-
-	_, found := library[newBook.ISBN]
+	l.mux.Lock()
+	_, found := l.library[newBook.ISBN]
 	if found == false {
 		fmt.Fprintf(w, "Book with ISBN %s doesn't exist, ignoring", newBook.ISBN)
 	} else {
@@ -138,39 +139,45 @@ func updateBook(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		library[newBook.ISBN] = newBook
+		l.library[newBook.ISBN] = newBook
 
 	}
-	mutex.Unlock()
-
+	l.mux.Unlock()
 }
 
-func deleteBook(w http.ResponseWriter, r *http.Request) {
+func (l *libraryHandler) deleteBook(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.Method)
 	wantedBook := r.URL.Query().Get("ISBN")
-	mutex.Lock()
-	_, found := library[wantedBook]
+	l.mux.Lock()
+	_, found := l.library[wantedBook]
 	if found == false {
 		fmt.Fprintf(w, "Doesn't exist")
 	} else {
-		delete(library, wantedBook)
+		delete(l.library, wantedBook)
 		fmt.Fprintf(w, "Successfully deleted book with ISBN : %s from library \n", wantedBook)
 	}
-	mutex.Unlock()
+	l.mux.Unlock()
+}
+
+func createLibrary() *libraryHandler {
+	return &libraryHandler{
+		library: map[string]book{},
+	}
 }
 
 func main() {
 	// Mock data initialization
+	newLibrary := createLibrary()
 	testbook1 := book{ISBN: strconv.Itoa(111111), Title: "Cooking 1", Pages: strconv.Itoa(240), Year: strconv.Itoa(2003), Author: &author{Name: "Tarik", Surname: "Redzepagic"}}
 	testbook2 := book{ISBN: strconv.Itoa(222222), Title: "Farming 1", Pages: strconv.Itoa(300), Year: strconv.Itoa(2005), Author: &author{Name: "Kirat", Surname: "Pagicredz"}}
-	library[testbook1.ISBN] = testbook1
-	library[testbook2.ISBN] = testbook2
+	newLibrary.library[testbook1.ISBN] = testbook1
+	newLibrary.library[testbook2.ISBN] = testbook2
 
-	http.HandleFunc("/getBooks", getBooks)
-	http.HandleFunc("/getBook", getBook)
-	http.HandleFunc("/addBook", addBook)
-	http.HandleFunc("/updateBook", updateBook)
-	http.HandleFunc("/deleteBook", deleteBook)
+	http.HandleFunc("/getBooks", newLibrary.getBooks)
+	http.HandleFunc("/getBook", newLibrary.getBook)
+	http.HandleFunc("/addBook", newLibrary.addBook)
+	http.HandleFunc("/updateBook", newLibrary.updateBook)
+	http.HandleFunc("/deleteBook", newLibrary.deleteBook)
 
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
