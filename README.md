@@ -9,4 +9,7 @@ git clone https://github.com/TRedzepagic/simple_bookstore.git
 ```
 in the terminal.
 
-This program is based on the http.listenandserve functionality. It keeps a non-persistent "library" (map) of books for the "bookstore". This program was done to practice REST functionality.
+This program was done to practice REST functionality.
+It keeps a non-persistent "library" (map) of books for the "bookstore".
+I have used JSON to encode information and you can use cURL or Postman to test the server out.
+
