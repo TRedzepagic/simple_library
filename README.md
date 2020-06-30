@@ -5,7 +5,7 @@ Practice project based on JSON, HTTP, REST..
 You can clone my repo using:
 
 ```
-git clone https://github.com/TRedzepagic/simple_bookstore.git
+git clone https://github.com/TRedzepagic/simple_library.git
 ```
 in the terminal.
 
