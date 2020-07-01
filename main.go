@@ -173,11 +173,11 @@ func main() {
 	newLibrary.library[testbook1.ISBN] = testbook1
 	newLibrary.library[testbook2.ISBN] = testbook2
 
-	http.HandleFunc("/getBooks", newLibrary.getBooks)
-	http.HandleFunc("/getBook", newLibrary.getBook)
-	http.HandleFunc("/addBook", newLibrary.addBook)
-	http.HandleFunc("/updateBook", newLibrary.updateBook)
-	http.HandleFunc("/deleteBook", newLibrary.deleteBook)
+	http.HandleFunc("/get-books", newLibrary.getBooks)
+	http.HandleFunc("/get-book", newLibrary.getBook)
+	http.HandleFunc("/add-book", newLibrary.addBook)
+	http.HandleFunc("/update-book", newLibrary.updateBook)
+	http.HandleFunc("/delete-book", newLibrary.deleteBook)
 
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
