@@ -32,9 +32,7 @@ func (l *libraryHandler) getBooks(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.Method)
 	fmt.Println("Sending all books")
 
-	l.mux.Lock()
 	bytes, marshallingError := json.Marshal(l.library)
-	l.mux.Unlock()
 	if marshallingError != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(marshallingError.Error()))
@@ -49,7 +47,6 @@ func (l *libraryHandler) getBook(w http.ResponseWriter, r *http.Request) {
 	wantedBook := r.URL.Query().Get("ISBN")
 	fmt.Println(wantedBook)
 
-	l.mux.Lock()
 	value, found := l.library[wantedBook]
 	if found == false {
 		fmt.Fprintf(w, "Book with ISBN %s doesn't exist", wantedBook)
@@ -62,7 +59,6 @@ func (l *libraryHandler) getBook(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, string(bytes))
 
 	}
-	l.mux.Unlock()
 
 }
 
