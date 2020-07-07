@@ -14,5 +14,5 @@ It keeps a non-persistent "library" (map) of books for the "bookstore".
 I have used JSON to encode information and you can use cURL or Postman to test the server out.
 
 ## To-Do
-- Add database
+- Add database (Added via https://github.com/TRedzepagic/simple_website, check it out)
 
