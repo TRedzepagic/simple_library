@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"sync"
@@ -175,8 +176,6 @@ func main() {
 	http.HandleFunc("/update-book", newLibrary.updateBook)
 	http.HandleFunc("/delete-book", newLibrary.deleteBook)
 
-	err := http.ListenAndServe(":8080", nil)
-	if err != nil {
-		panic(err)
-	}
+	fmt.Println("Server started..")
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
